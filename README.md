@@ -42,6 +42,7 @@ The first time you run any pkg command without a config file, pkg detects the pa
 ? Which package manager should pkg use?
 > pacman   Arch Linux native packages
   yay      Arch repos + AUR (yay)
+  paru     Arch repos + AUR (paru)
 ```
 
 The answer is saved to `~/.config/pkg/pkg.conf` and you are never asked again. If exactly one manager is detected, pkg picks it without asking. In a script or CI (no TTY), pkg fails with instructions rather than hanging.
