@@ -22,27 +22,41 @@ pkg always echoes the command it is about to run, so it doubles as a way to lear
 
 ## Install
 
+One command, identical on macOS and every Linux distribution:
+
 ```sh
-cargo install --path .
-# or
-cargo build --release && install -Dm755 target/release/pkg ~/.local/bin/pkg
+/bin/sh -c "$(curl -fsSL https://raw.githubusercontent.com/danilolucasmd/pkg/main/install.sh)"
 ```
 
-On macOS, or anywhere without a clone:
+It detects your platform, downloads the matching prebuilt binary (x86_64 and arm64, macOS and Linux), installs it to `~/.local/bin`, and adds that directory to your `PATH` in the correct startup file for your shell — `~/.zshrc`, `~/.bashrc`, `~/.bash_profile` on macOS, or `config.fish`. Open a new terminal afterwards and `pkg install ...` works.
+
+If no prebuilt binary matches your platform, the installer falls back to building from source with cargo.
+
+The installer respects a few environment variables:
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `PKG_INSTALL_DIR` | `~/.local/bin` | Where the binary goes |
+| `PKG_VERSION` | latest release | Install a specific tag |
+| `PKG_NO_MODIFY_PATH` | unset | Set to `1` to never touch shell startup files |
 
 ```sh
-cargo install --git https://github.com/danilolucasmd/pkg
+# system-wide, without editing any profile
+curl -fsSL https://raw.githubusercontent.com/danilolucasmd/pkg/main/install.sh \
+  | PKG_INSTALL_DIR=/usr/local/bin PKG_NO_MODIFY_PATH=1 sudo -E sh
 ```
 
-Arch users can build the AUR-style package from the included `PKGBUILD`:
+### Other ways
 
 ```sh
-makepkg -si
+cargo install --git https://github.com/danilolucasmd/pkg   # needs Rust
+cargo install --path .                                     # from a clone
+makepkg -si                                                # Arch, via the included PKGBUILD
 ```
 
 ### If `pkg` is not found afterwards
 
-`cargo install` writes to `~/.cargo/bin`, which is only added to your `PATH` if you installed Rust through rustup. Installing Rust with Homebrew or a distro package leaves that directory off `PATH`, so `pkg` only works by full path.
+This only happens with the `cargo install` routes; the installer script handles it for you. `cargo install` writes to `~/.cargo/bin`, which is added to your `PATH` only if you installed Rust through rustup — a Homebrew or distro Rust leaves it off, so `pkg` works only by full path.
 
 pkg detects this itself: the first run, and any `pkg config show`, prints the exact line to add for your shell. For zsh:
 
@@ -52,7 +66,7 @@ source ~/.zshrc
 rehash
 ```
 
-`rehash` matters for zsh, which caches command lookups; a new terminal tab works too. Alternatively, symlink into a directory already on your `PATH` (`~/.local/bin`, or `/opt/homebrew/bin` on Apple Silicon) and skip editing your profile.
+`rehash` matters for zsh, which caches command lookups; a new terminal tab works too.
 
 ## First run
 
