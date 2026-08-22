@@ -277,3 +277,30 @@ fn every_backend_id_round_trips() {
     }
     assert_eq!(Backend::parse("portage"), None);
 }
+
+#[test]
+fn path_advice_matches_the_shell() {
+    use crate::install_hint::shell_advice;
+
+    assert_eq!(shell_advice("/bin/zsh"), ("~/.zshrc", Some("rehash")));
+    assert_eq!(
+        shell_advice("/opt/homebrew/bin/fish"),
+        ("~/.config/fish/config.fish", None)
+    );
+    assert_eq!(
+        shell_advice("/usr/bin/some-exotic-shell").0,
+        "your shell startup file"
+    );
+
+    let (rc, rehash) = shell_advice("/bin/bash");
+    assert_eq!(rehash, Some("hash -r"));
+    // macOS login shells read ~/.bash_profile, not ~/.bashrc.
+    assert_eq!(
+        rc,
+        if cfg!(target_os = "macos") {
+            "~/.bash_profile"
+        } else {
+            "~/.bashrc"
+        }
+    );
+}

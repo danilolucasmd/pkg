@@ -142,5 +142,6 @@ pub fn onboard() -> Result<Config> {
     };
     save(&cfg)?;
     eprintln!("pkg: saved backend = {chosen} to {}", path().display());
+    crate::install_hint::warn_if_unreachable();
     Ok(cfg)
 }

@@ -28,11 +28,31 @@ cargo install --path .
 cargo build --release && install -Dm755 target/release/pkg ~/.local/bin/pkg
 ```
 
+On macOS, or anywhere without a clone:
+
+```sh
+cargo install --git https://github.com/danilolucasmd/pkg
+```
+
 Arch users can build the AUR-style package from the included `PKGBUILD`:
 
 ```sh
 makepkg -si
 ```
+
+### If `pkg` is not found afterwards
+
+`cargo install` writes to `~/.cargo/bin`, which is only added to your `PATH` if you installed Rust through rustup. Installing Rust with Homebrew or a distro package leaves that directory off `PATH`, so `pkg` only works by full path.
+
+pkg detects this itself: the first run, and any `pkg config show`, prints the exact line to add for your shell. For zsh:
+
+```sh
+echo 'export PATH="$HOME/.cargo/bin:$PATH"' >> ~/.zshrc
+source ~/.zshrc
+rehash
+```
+
+`rehash` matters for zsh, which caches command lookups; a new terminal tab works too. Alternatively, symlink into a directory already on your `PATH` (`~/.local/bin`, or `/opt/homebrew/bin` on Apple Silicon) and skip editing your profile.
 
 ## First run
 

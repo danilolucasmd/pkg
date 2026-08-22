@@ -1,6 +1,7 @@
 mod backend;
 mod config;
 mod exec;
+mod install_hint;
 
 #[cfg(test)]
 mod tests;
@@ -197,6 +198,7 @@ fn config_cmd(action: ConfigCmd) -> Result<i32> {
                 println!("escalator = {}", cfg.escalator);
                 println!("path      = {}", config::path().display());
                 println!("detected  = {}", detected_list());
+                install_hint::warn_if_unreachable();
             }
             None => {
                 println!("pkg is not configured yet; run `pkg config init`.");
