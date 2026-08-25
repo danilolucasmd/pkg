@@ -14,6 +14,10 @@ jobs:
   build:
     name: ${{ matrix.target }}
     runs-on: ${{ matrix.os }}
+    # A job that never gets a runner is cancelled by GitHub after 24 hours, and
+    # a cancelled matrix leg skips `release` below -- which is how v0.1.0 and
+    # v0.1.1 were tagged without ever publishing anything. Fail in minutes.
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
@@ -22,7 +26,11 @@ jobs:
             target: x86_64-unknown-linux-gnu
           - os: ubuntu-24.04-arm
             target: aarch64-unknown-linux-gnu
-          - os: macos-13
+          # Both macOS targets build on the Apple-silicon runner: the Intel
+          # image (macos-13) has been retired, so asking for it queues forever.
+          # Xcode ships both SDKs, so the x86_64 leg is a plain cross-build with
+          # no extra toolchain to configure.
+          - os: macos-latest
             target: x86_64-apple-darwin
           - os: macos-latest
             target: aarch64-apple-darwin
@@ -30,20 +38,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Each target is built on its own native runner, so there is no
-      # cross-compilation toolchain to configure.
       - name: Install Rust
-        run: rustup toolchain install stable --profile minimal
+        run: rustup toolchain install stable --profile minimal --target ${{ matrix.target }}
 
       - uses: Swatinem/rust-cache@v2
         with:
           key: ${{ matrix.target }}
 
+      # --target on every leg, including the native ones, so the binary is
+      # always at the same path below.
       - name: Build
-        run: cargo build --release --locked
+        run: cargo build --release --locked --target ${{ matrix.target }}
 
       - name: Package
-        run: tar -czf pkg-${{ matrix.target }}.tar.gz -C target/release pkg
+        run: tar -czf pkg-${{ matrix.target }}.tar.gz -C target/${{ matrix.target }}/release pkg
 
       - uses: actions/upload-artifact@v4
         with:
