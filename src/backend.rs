@@ -161,7 +161,7 @@ pub fn plan(backend: Backend, action: Action, rest: &[String], yes: bool) -> Vec
     let rest = normalize_operands(backend, action, rest);
     let mut steps = match (backend, action) {
         // ---- pacman family -------------------------------------------------
-        // Arch does not support partial upgrades, so updating one package
+        // Arch does not support partial upgrades, so updating one repo package
         // upgrades the system too (-Syu <pkg>) rather than -Sy <pkg>.
         (Backend::Pacman, Action::Install) => vec![Step::new(backend, action, &["-S"])],
         (Backend::Pacman, Action::Search) => vec![Step::new(backend, action, &["-Ss"])],
@@ -180,8 +180,10 @@ pub fn plan(backend: Backend, action: Action, rest: &[String], yes: bool) -> Vec
         (Backend::Yay, Action::UpdateAll) | (Backend::Paru, Action::UpdateAll) => {
             vec![Step::new(backend, action, &["-Syu"])]
         }
+        // AUR packages are not in a sync DB, so -S already resolves the current
+        // AUR version: updating one leaves the rest of the system alone.
         (Backend::Yay, Action::Update) | (Backend::Paru, Action::Update) => {
-            vec![Step::new(backend, action, &["-Syu"])]
+            vec![Step::new(backend, action, &["-S"])]
         }
         (Backend::Yay, Action::Remove) | (Backend::Paru, Action::Remove) => {
             vec![Step::new(backend, action, &["-Rns"])]

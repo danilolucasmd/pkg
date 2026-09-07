@@ -1,6 +1,6 @@
 use crate::backend::{plan, Action, Backend};
 
-/// Flatten a plan into `["yay -Syu foo", ...]` so expectations read like shell.
+/// Flatten a plan into `["yay -S foo", ...]` so expectations read like shell.
 fn cmds(backend: Backend, action: Action, rest: &[&str], yes: bool) -> Vec<String> {
     let rest: Vec<String> = rest.iter().map(|s| s.to_string()).collect();
     plan(backend, action, &rest, yes)
@@ -121,13 +121,23 @@ fn bare_update_refreshes_and_upgrades_everything() {
 }
 
 #[test]
-fn updating_one_package_never_produces_a_partial_upgrade_on_arch() {
+fn updating_one_package_never_produces_a_partial_upgrade_on_pacman() {
     // Arch has no supported partial-upgrade path, so `pkg update foo` upgrades
     // the system as well rather than running -Sy foo.
-    for backend in [Backend::Pacman, Backend::Yay, Backend::Paru] {
+    assert_eq!(
+        one(Backend::Pacman, Action::Update, &["ripgrep"]),
+        "pacman -Syu ripgrep"
+    );
+}
+
+#[test]
+fn updating_one_package_on_an_aur_helper_touches_only_that_package() {
+    // -S resolves the current AUR version without a sync-DB refresh, so the
+    // rest of the system is left where it is.
+    for backend in [Backend::Yay, Backend::Paru] {
         assert_eq!(
             one(backend, Action::Update, &["ripgrep"]),
-            format!("{backend} -Syu ripgrep")
+            format!("{backend} -S ripgrep")
         );
     }
 }

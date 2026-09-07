@@ -12,7 +12,7 @@ $ pkg search ripgrep
 -> yay -Ss ripgrep
 
 $ pkg update ripgrep      # update one package
--> yay -Syu ripgrep
+-> yay -S ripgrep
 
 $ pkg update              # refresh metadata and upgrade the system
 -> yay -Syu
@@ -139,8 +139,8 @@ Because of that passthrough, **pkg's own flags must come before the package name
 | | `install` | `search` | `update <pkg>` | `update` | `remove` | `list` | `info` |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | **pacman** | `-S` | `-Ss` | `-Syu <pkg>` | `-Syu` | `-Rns` | `-Q` | `-Si` |
-| **yay** | `-S` | `-Ss` | `-Syu <pkg>` | `-Syu` | `-Rns` | `-Q` | `-Si` |
-| **paru** | `-S` | `-Ss` | `-Syu <pkg>` | `-Syu` | `-Rns` | `-Q` | `-Si` |
+| **yay** | `-S` | `-Ss` | `-S <pkg>` | `-Syu` | `-Rns` | `-Q` | `-Si` |
+| **paru** | `-S` | `-Ss` | `-S <pkg>` | `-Syu` | `-Rns` | `-Q` | `-Si` |
 | **apt** | `install` | `search` | `update` + `install --only-upgrade` | `update` + `upgrade` | `remove` | `list --installed` | `show` |
 | **dnf** | `install` | `search` | `upgrade --refresh <pkg>` | `upgrade --refresh` | `remove` | `list --installed` | `info` |
 | **flatpak** | `install` | `search` | `update <pkg>` | `update` | `uninstall` | `list` | `info` |
@@ -150,7 +150,8 @@ Because of that passthrough, **pkg's own flags must come before the package name
 
 Notes:
 
-- **Arch has no supported partial-upgrade path**, so `pkg update <pkg>` on pacman/yay/paru expands to `-Syu <pkg>` rather than `-Sy <pkg>`. Updating one package upgrades the system with it, which is the only safe thing to do.
+- **Arch has no supported partial-upgrade path**, so `pkg update <pkg>` on pacman expands to `-Syu <pkg>` rather than `-Sy <pkg>`. Updating one repo package upgrades the system with it, which is the only safe thing to do.
+- **yay and paru use `-S <pkg>` instead.** AUR packages live outside the sync databases, so `-S` already resolves the current AUR version and updating one package leaves the rest of the system alone. The tradeoff is that a repo package updated this way is resolved against the sync database as it stands, so run a bare `pkg update` when you want the repos refreshed.
 - Where a verb needs two commands, they run in order and stop at the first failure. Package names attach to the last step only, so `pkg update foo` on apt runs a bare `apt update` and then `apt install --only-upgrade foo`.
 - `nix info` reuses `nix search`, which is the closest equivalent nix offers.
 - Bare `pkg install foo` on nix becomes `nixpkgs#foo`; anything already containing `#` or `:` is left alone.
