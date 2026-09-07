@@ -1,6 +1,6 @@
 # Maintainer: Danilo de Lucas <danilolucasmd@gmail.com>
 pkgname=pkg
-pkgver=0.1.2
+pkgver=0.2.0
 pkgrel=1
 pkgdesc="One set of verbs for every Linux package manager"
 arch=('x86_64' 'aarch64')

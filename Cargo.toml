@@ -1,6 +1,6 @@
 [package]
 name = "pkg"
-version = "0.1.2"
+version = "0.2.0"
 edition = "2021"
 description = "One set of verbs for every Linux package manager"
 license = "MIT"
