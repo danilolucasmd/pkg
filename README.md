@@ -176,6 +176,23 @@ cargo fmt
 
 The mapping lives in one function, `backend::plan`, and the tests assert the exact argv it produces for each backend.
 
+## Releasing an update
+
+`install.sh` downloads prebuilt binaries from GitHub releases, and the release workflow only runs on a pushed version tag. An untagged commit on `main` never reaches anyone who installed with the one-liner, so every change ships as a new version.
+
+1. Bump the version in all three places, keeping them in step: `version` in `Cargo.toml`, `pkgver` in `PKGBUILD`, and the `pkg` entry in `Cargo.lock` — a `cargo build` refreshes the lock file for you. Before 1.0, backward-incompatible behaviour changes go in the minor slot and everything else in the patch slot.
+2. Commit and push `main`.
+3. Tag and push the tag:
+
+   ```sh
+   git tag v0.2.0
+   git push origin v0.2.0
+   ```
+
+4. The `Release` workflow builds `x86_64`/`aarch64` for Linux and macOS, then attaches the four `pkg-<target>.tar.gz` archives to a release for the tag. Watch it with `gh run watch`, and check the assets landed with `gh release view v0.2.0`.
+
+Until those assets exist, `install.sh` falls back to `cargo install --git`, which builds whatever is on `main`. To install your working tree instead, run `cargo install --path .`.
+
 ## License
 
 MIT
